@@ -1,73 +1,48 @@
+# frontend/app.py
+
 from flask import Flask, render_template, request, jsonify
-import os, json
-from PIL import Image
-from collections import Counter
-import cv2
-import numpy as np
-from sklearn.cluster import KMeans
+import os
+import requests
 
 app = Flask(__name__)
 
-# Folders
-UPLOAD_FOLDER = 'uploads'
-RESULT_FOLDER = 'results'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(RESULT_FOLDER, exist_ok=True)
+# Point this to your FastAPI base URL.
+# For local dev it’s 127.0.0.1:8000; for ngrok set FASTAPI_BASE env var.
+FASTAPI_BASE = os.environ.get("FASTAPI_BASE", "http://127.0.0.1:8000")
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
-def get_dominant_color(image_path):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.resize(image, (100, 100))
-
-    pixels = image.reshape(-1, 3)
-    kmeans = KMeans(n_clusters=3, n_init=10, random_state=42)
-    kmeans.fit(pixels)
-
-    counts = np.bincount(kmeans.labels_)
-    dominant_color = kmeans.cluster_centers_[np.argmax(counts)]
-
-    return {
-        'r': int(dominant_color[0]),
-        'g': int(dominant_color[1]),
-        'b': int(dominant_color[2])
-    }
-
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/analyze', methods=['POST'])
+@app.route("/health")
+def health():
+    try:
+        r = requests.get(f"{FASTAPI_BASE}/health", timeout=5)
+        return jsonify({"frontend_ok": True, "backend_ok": r.ok, "backend_response": r.json()})
+    except Exception as e:
+        return jsonify({"frontend_ok": True, "backend_ok": False, "error": str(e)}), 503
+
+@app.route("/analyze", methods=["POST"])
 def analyze_images():
-    results = {}
+    # Expect all three files from the form: selfie, outfit1, outfit2
+    required = ["selfie", "outfit1", "outfit2"]
+    files = {}
 
-    for field in ['selfie', 'outfit1', 'outfit2']:
-        if field in request.files and request.files[field]:
-            file = request.files[field]
-            filename = file.filename
-            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            result_path = os.path.join(RESULT_FOLDER, f"{filename}.json")
+    for key in required:
+        f = request.files.get(key)
+        if not f:
+            return jsonify({"error": f"Missing file: {key}"}), 400
+        # pass-through stream directly to FastAPI (no need to save locally)
+        files[key] = (f.filename, f.stream, f.mimetype or "application/octet-stream")
 
-            # Save image
-            file.save(upload_path)
+    try:
+        resp = requests.post(f"{FASTAPI_BASE}/analyze/all", files=files, timeout=60)
+        resp.raise_for_status()
+        return jsonify(resp.json())
+    except requests.RequestException as e:
+        # Bubble up a helpful error to the UI
+        return jsonify({"error": f"Backend request failed: {e}"}), 502
 
-            # 🔒 Reuse analysis if it exists
-            if os.path.exists(result_path):
-                with open(result_path, 'r') as f:
-                    dominant = json.load(f)
-            else:
-                dominant = get_dominant_color(upload_path)
-                with open(result_path, 'w') as f:
-                    json.dump(dominant, f)
-
-            results[field] = dominant
-        else:
-            results[field] = None
-
-    results['summary'] = "Analysis complete! Dominant colors extracted successfully."
-    return jsonify(results)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    # Run Flask on port 5000
+    app.run(debug=True, port=5000)

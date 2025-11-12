@@ -1021,285 +1021,177 @@ result = response.json()
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            const analysisSection = document.getElementById('analysisSection');
-            const analyzeImagesBtn = document.getElementById('analyzeImagesBtn');
-            
-            // File inputs and upload areas
-            const selfieInput = document.getElementById('selfieInput');
-            const outfit1Input = document.getElementById('outfit1Input');
-            const outfit2Input = document.getElementById('outfit2Input');
-            
-            const selfieUpload = document.getElementById('selfieUpload');
-            const outfit1Upload = document.getElementById('outfit1Upload');
-            const outfit2Upload = document.getElementById('outfit2Upload');
-            
-            // Resubmit buttons
-            const resubmitSelfie = document.getElementById('resubmitSelfie');
-            const resubmitOutfit1 = document.getElementById('resubmitOutfit1');
-            const resubmitOutfit2 = document.getElementById('resubmitOutfit2');
-            
-            // File name displays
-            const selfieFileName = document.getElementById('selfieFileName');
-            const outfit1FileName = document.getElementById('outfit1FileName');
-            const outfit2FileName = document.getElementById('outfit2FileName');
-            
-            // Preview elements
-            const selfiePreview = document.getElementById('selfiePreview');
-            const outfit1Preview = document.getElementById('outfit1Preview');
-            const outfit2Preview = document.getElementById('outfit2Preview');
-            
-            // Store uploaded files
-            let uploadedFiles = {
-                selfie: null,
-                outfit1: null,
-                outfit2: null
-            };
-            
-            // Scroll to analysis section when button is clicked
-            analyzeBtn.addEventListener('click', function() {
-                analysisSection.scrollIntoView({ behavior: 'smooth' });
-            });
-            
-            // Set up upload area click handlers
-            selfieUpload.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('resubmit-btn')) {
-                    selfieInput.click();
-                }
-            });
-            
-            outfit1Upload.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('resubmit-btn')) {
-                    outfit1Input.click();
-                }
-            });
-            
-            outfit2Upload.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('resubmit-btn')) {
-                    outfit2Input.click();
-                }
-            });
-            
-            // Set up file input change handlers
-            selfieInput.addEventListener('change', function(e) {
-                handleFileUpload(e.target.files[0], 'selfie');
-            });
-            
-            outfit1Input.addEventListener('change', function(e) {
-                handleFileUpload(e.target.files[0], 'outfit1');
-            });
-            
-            outfit2Input.addEventListener('change', function(e) {
-                handleFileUpload(e.target.files[0], 'outfit2');
-            });
-            
-            // Set up resubmit button handlers
-            resubmitSelfie.addEventListener('click', function(e) {
-                e.stopPropagation();
-                resetFile('selfie');
-            });
-            
-            resubmitOutfit1.addEventListener('click', function(e) {
-                e.stopPropagation();
-                resetFile('outfit1');
-            });
-            
-            resubmitOutfit2.addEventListener('click', function(e) {
-                e.stopPropagation();
-                resetFile('outfit2');
-            });
-            
-            // Set up preview remove button handlers
-            document.querySelectorAll('.preview-remove').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const target = this.getAttribute('data-target');
-                    resetFile(target);
-                });
-            });
-            
-            // Handle drag and drop for each upload area
-            setupDragAndDrop(selfieUpload, 'selfie');
-            setupDragAndDrop(outfit1Upload, 'outfit1');
-            setupDragAndDrop(outfit2Upload, 'outfit2');
-            
-            // Handle analyze button click
-            analyzeImagesBtn.addEventListener('click', function() {
-                // Check if all files are uploaded
-                if (!uploadedFiles.selfie || !uploadedFiles.outfit1 || !uploadedFiles.outfit2) {
-                    alert('Please upload all three images: selfie, outfit 1, and outfit 2.');
-                    return;
-                }
-                
-                // In a real implementation, this would send the images to your backend
-                // For this demo, we'll simulate the response
-                simulateAnalysis();
-            });
-            
-            function handleFileUpload(file, type) {
-                if (!file) return;
-                
-                uploadedFiles[type] = file;
-                
-                // Update file name display
-                document.getElementById(`${type}FileName`).textContent = file.name;
-                
-                // Show resubmit button
-                document.getElementById(`resubmit${type.charAt(0).toUpperCase() + type.slice(1)}`).style.display = 'block';
-                
-                // Create preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const previewElement = document.getElementById(`${type}Preview`);
-                    previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'preview-remove';
-                    removeBtn.setAttribute('data-target', type);
-                    removeBtn.innerHTML = '×';
-                    removeBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        resetFile(type);
-                    });
-                    previewElement.appendChild(removeBtn);
-                };
-                reader.readAsDataURL(file);
-            }
-            
-            function resetFile(type) {
-                uploadedFiles[type] = null;
-                document.getElementById(`${type}FileName`).textContent = 'No file selected';
-                document.getElementById(`resubmit${type.charAt(0).toUpperCase() + type.slice(1)}`).style.display = 'none';
-                document.getElementById(`${type}Preview`).innerHTML = `<span>${type.charAt(0).toUpperCase() + type.slice(1)}</span><button class="preview-remove" data-target="${type}">×</button>`;
-                
-                // Reattach event listener to the new remove button
-                const newButton = document.querySelector(`.preview-remove[data-target="${type}"]`);
-                newButton.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    resetFile(type);
-                });
-            }
-            
-            function setupDragAndDrop(uploadArea, type) {
-                uploadArea.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    uploadArea.style.background = 'rgba(106, 0, 255, 0.1)';
-                });
-                
-                uploadArea.addEventListener('dragleave', function() {
-                    uploadArea.style.background = '';
-                });
-                
-                uploadArea.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    uploadArea.style.background = '';
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        handleFileUpload(files[0], type);
-                    }
-                });
-            }
-            
-            function simulateAnalysis() {
-                // Simulate API call delay
-                analyzeImagesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
-                analyzeImagesBtn.disabled = true;
-                
-                setTimeout(() => {
-                    // Simulated results based on your backend logic
-                    const undertone = Math.random() > 0.5 ? 
-                        (Math.random() > 0.5 ? 'Warm' : 'Cool') : 'Neutral';
-                    
-                    const harmonyTypes = ['Complementary', 'Analogous', 'Clashing'];
-                    const harmony = harmonyTypes[Math.floor(Math.random() * harmonyTypes.length)];
-                    
-                    // Update UI with results
-                    updateResults(undertone, harmony);
-                    
-                    analyzeImagesBtn.innerHTML = 'Analyze Colors';
-                    analyzeImagesBtn.disabled = false;
-                }, 2000);
-            }
-            
-            function updateResults(undertone, harmony) {
-                // Update undertone result
-                const undertoneResult = document.getElementById('undertoneResult');
-                const undertoneDot = undertoneResult.querySelector('.undertone-dot');
-                
-                undertoneDot.className = 'undertone-dot';
-                undertoneDot.classList.add(undertone.toLowerCase());
-                
-                undertoneResult.querySelector('span').textContent = `${undertone} Undertone`;
-                
-                // Update harmony result
-                const harmonyResult = document.getElementById('harmonyResult');
-                const harmonyBadge = harmonyResult.querySelector('.harmony-badge');
-                
-                harmonyBadge.className = 'harmony-badge';
-                harmonyBadge.classList.add(harmony.toLowerCase());
-                harmonyBadge.textContent = harmony;
-                
-                harmonyResult.querySelector('span').textContent = `${harmony} Color Harmony`;
-                
-                // Update palettes based on undertone
-                updatePalettes(undertone);
-            }
-            
-            function updatePalettes(undertone) {
-                // Define color palettes based on undertone (from your logic.py)
-                const palettes = {
-                    'Warm': ['#C8A951', '#E97451', '#E1AD01', '#F3E5AB', '#CC5500'],
-                    'Cool': ['#1F305E', '#FF66CC', '#50C878', '#808080', '#E6E6FA'],
-                    'Neutral': ['#F5F5DC', '#FFFFFF', '#008080', '#36454F', '#FADADD']
-                };
-                
-                const colorNames = {
-                    'Warm': ['Olive', 'Coral', 'Mustard', 'Cream', 'Red-Orange'],
-                    'Cool': ['Navy', 'Rose', 'Emerald', 'Gray', 'Lavender'],
-                    'Neutral': ['Beige', 'White', 'Teal', 'Charcoal', 'Soft Pink']
-                };
-                
-                const skinPalette = document.getElementById('skinPalette');
-                const recommendedPalette = document.getElementById('recommendedPalette');
-                
-                // Clear existing palettes
-                skinPalette.innerHTML = '';
-                recommendedPalette.innerHTML = '';
-                
-                // Add color swatches
-                palettes[undertone].forEach((color, index) => {
-                    const skinSwatch = document.createElement('div');
-                    skinSwatch.className = 'color-swatch';
-                    skinSwatch.style.background = color;
-                    skinSwatch.setAttribute('data-color', colorNames[undertone][index]);
-                    skinPalette.appendChild(skinSwatch);
-                    
-                    const recSwatch = document.createElement('div');
-                    recSwatch.className = 'color-swatch';
-                    recSwatch.style.background = color;
-                    recSwatch.setAttribute('data-color', colorNames[undertone][index]);
-                    recommendedPalette.appendChild(recSwatch);
-                });
-            }
-        });
-    </script>
-    <script>
-document.getElementById('analyzeImagesBtn').addEventListener('click', async () => {
-    const formData = new FormData();
-    formData.append('selfie', document.getElementById('selfieInput').files[0]);
-    formData.append('outfit1', document.getElementById('outfit1Input').files[0]);
-    formData.append('outfit2', document.getElementById('outfit2Input').files[0]);
+document.addEventListener('DOMContentLoaded', function() {
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const analysisSection = document.getElementById('analysisSection');
+  const analyzeImagesBtn = document.getElementById('analyzeImagesBtn');
 
-    const response = await fetch('/analyze', {
-        method: 'POST',
-        body: formData
+  // File inputs and upload areas
+  const selfieInput  = document.getElementById('selfieInput');
+  const outfit1Input = document.getElementById('outfit1Input');
+  const outfit2Input = document.getElementById('outfit2Input');
+
+  const selfieUpload  = document.getElementById('selfieUpload');
+  const outfit1Upload = document.getElementById('outfit1Upload');
+  const outfit2Upload = document.getElementById('outfit2Upload');
+
+  // Resubmit buttons
+  const resubmitSelfie  = document.getElementById('resubmitSelfie');
+  const resubmitOutfit1 = document.getElementById('resubmitOutfit1');
+  const resubmitOutfit2 = document.getElementById('resubmitOutfit2');
+
+  // File names
+  const selfieFileName  = document.getElementById('selfieFileName');
+  const outfit1FileName = document.getElementById('outfit1FileName');
+  const outfit2FileName = document.getElementById('outfit2FileName');
+
+  // Previews
+  const selfiePreview  = document.getElementById('selfiePreview');
+  const outfit1Preview = document.getElementById('outfit1Preview');
+  const outfit2Preview = document.getElementById('outfit2Preview');
+
+  // Scroll to analysis section
+  analyzeBtn.addEventListener('click', () => {
+    analysisSection.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Upload area clicks
+  selfieUpload.addEventListener('click',  ev => { if (!ev.target.classList.contains('resubmit-btn')) selfieInput.click(); });
+  outfit1Upload.addEventListener('click', ev => { if (!ev.target.classList.contains('resubmit-btn')) outfit1Input.click(); });
+  outfit2Upload.addEventListener('click', ev => { if (!ev.target.classList.contains('resubmit-btn')) outfit2Input.click(); });
+
+  // Input changes
+  selfieInput.addEventListener('change',  e => handleFileUpload(e.target.files[0], 'selfie'));
+  outfit1Input.addEventListener('change', e => handleFileUpload(e.target.files[0], 'outfit1'));
+  outfit2Input.addEventListener('change', e => handleFileUpload(e.target.files[0], 'outfit2'));
+
+  // Resubmit buttons
+  resubmitSelfie.addEventListener('click',  e => { e.stopPropagation(); resetFile('selfie');  });
+  resubmitOutfit1.addEventListener('click', e => { e.stopPropagation(); resetFile('outfit1'); });
+  resubmitOutfit2.addEventListener('click', e => { e.stopPropagation(); resetFile('outfit2'); });
+
+  // Remove buttons on previews
+  document.querySelectorAll('.preview-remove').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      resetFile(btn.getAttribute('data-target'));
     });
+  });
 
-    const data = await response.json();
-    console.log(data);
-    alert(data.summary);
+  // Drag & drop
+  setupDnD(selfieUpload,  'selfie');
+  setupDnD(outfit1Upload, 'outfit1');
+  setupDnD(outfit2Upload, 'outfit2');
+
+  function setupDnD(area, type){
+    area.addEventListener('dragover', e => { e.preventDefault(); area.style.background = 'rgba(106,0,255,0.1)'; });
+    area.addEventListener('dragleave', () => { area.style.background = ''; });
+    area.addEventListener('drop', e => {
+      e.preventDefault(); area.style.background = '';
+      if (e.dataTransfer.files.length > 0) handleFileUpload(e.dataTransfer.files[0], type);
+    });
+  }
+
+  function handleFileUpload(file, type){
+    if(!file) return;
+    document.getElementById(`${type}FileName`).textContent = file.name;
+    document.getElementById(`resubmit${cap(type)}`).style.display = 'block';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById(`${type}Preview`);
+      preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'preview-remove';
+      removeBtn.setAttribute('data-target', type);
+      removeBtn.innerHTML = '×';
+      removeBtn.addEventListener('click', ev => { ev.stopPropagation(); resetFile(type); });
+      preview.appendChild(removeBtn);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetFile(type){
+    const input = document.getElementById(`${type}Input`);
+    input.value = '';
+    document.getElementById(`${type}FileName`).textContent = 'No file selected';
+    document.getElementById(`resubmit${cap(type)}`).style.display = 'none';
+    document.getElementById(`${type}Preview`).innerHTML =
+      `<span>${cap(type)}</span><button class="preview-remove" data-target="${type}">×</button>`;
+    const newBtn = document.querySelector(`.preview-remove[data-target="${type}"]`);
+    newBtn.addEventListener('click', e => { e.stopPropagation(); resetFile(type); });
+  }
+
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // === REAL ANALYZE HANDLER (no simulator, no alerts) ===
+  analyzeImagesBtn.addEventListener('click', async () => {
+    const s  = selfieInput.files[0];
+    const o1 = outfit1Input.files[0];
+    const o2 = outfit2Input.files[0];
+    if(!s || !o1 || !o2){
+      alert('Please upload selfie, outfit1, and outfit2.');
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('selfie',  s);
+    fd.append('outfit1', o1);
+    fd.append('outfit2', o2);
+
+    analyzeImagesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+    analyzeImagesBtn.disabled = true;
+
+    try{
+      const res  = await fetch('/analyze', { method:'POST', body: fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'Unknown error');
+      updateResultsFromAPI(data);
+      console.log('Analysis complete ✓');
+    }catch(err){
+      console.error(err);
+      alert('Backend error: ' + err.message);
+    }finally{
+      analyzeImagesBtn.innerHTML = 'Analyze Colors';
+      analyzeImagesBtn.disabled = false;
+    }
+  });
+
+  function updateResultsFromAPI(data){
+    // Undertone
+    const undertone = data.skin.undertone; // Warm | Cool | Neutral
+    const dot = document.querySelector('.undertone-dot');
+    dot.className = 'undertone-dot ' + undertone.toLowerCase();
+    document.querySelector('#undertoneResult span').textContent = `${undertone} Undertone`;
+
+    // Harmony
+    const harmony = data.outfits.harmony; // Complementary | Analogous | Balanced Contrast | Clashing
+    const badge = document.querySelector('.harmony-badge');
+    badge.className = 'harmony-badge ' + harmony.toLowerCase().replace(/\s+/g,'-');
+    badge.textContent = harmony;
+    document.querySelector('#harmonyResult span').textContent = `${harmony} Color Harmony`;
+
+    // Palettes (name → hex map just for display)
+    const nameToHex = {
+      'Olive':'#808000','Coral':'#FF7F50','Mustard':'#E1AD01','Cream':'#F3E5AB','Red-Orange':'#CC5500',
+      'Navy':'#001F3F','Rose':'#FF66CC','Emerald':'#50C878','Gray':'#808080','Lavender':'#E6E6FA',
+      'Beige':'#F5F5DC','White':'#FFFFFF','Teal':'#008080','Charcoal':'#36454F','Soft Pink':'#FADADD'
+    };
+
+    const skinPal = document.getElementById('skinPalette');
+    const recPal  = document.getElementById('recommendedPalette');
+    skinPal.innerHTML = ''; recPal.innerHTML = '';
+
+    (data.skin.recommended_palette || []).forEach(name => {
+      const hex = nameToHex[name] || '#888';
+      skinPal.innerHTML += `<div class="color-swatch" style="background:${hex}" data-color="${name}"></div>`;
+      recPal.innerHTML  += `<div class="color-swatch" style="background:${hex}" data-color="${name}"></div>`;
+    });
+  }
 });
 </script>
 
+
 </body>
 </html>
+
