@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChromaStyle | AI-Powered Color Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #0a0a1a;
+            --secondary: #1a1a2e;
+            --accent: #6a00ff;
+            --accent-light: #8a2be2;
+            --text: #e6e6ff;
+            --text-secondary: #b8b8d6;
+            --warm: #ff6b6b;
+            --cool: #4dabf7;
+            --neutral: #52b788;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(106, 0, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(106, 0, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        nav a:hover::before {
+            left: 100%;
+        }
+
+        nav a:hover {
+            color: var(--accent-light);
+            box-shadow: 0 0 15px rgba(106, 0, 255, 0.3);
+        }
+
+        .cta-button {
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 0, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 0, 255, 0.5);
+        }
+
+        .cta-button-full {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(26, 26, 46, 0.8) 0%, var(--primary) 70%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(106,0,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #fff, var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .secondary-button {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--accent);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .secondary-button:hover {
+            background: rgba(106, 0, 255, 0.1);
+            box-shadow: 0 0 15px rgba(106, 0, 255, 0.3);
+        }
+
+        /* Analysis Section */
+        .analysis {
+            padding: 100px 0;
+            background: var(--secondary);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .analysis-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(10, 10, 26, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(106, 0, 255, 0.2);
+        }
+
+        .upload-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-areas {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--accent);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: rgba(106, 0, 255, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .upload-area p {
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .upload-area .file-name {
+            font-size: 0.9rem;
+            color: var(--accent-light);
+            margin-top: 5px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .resubmit-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+        }
+
+        .resubmit-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        .upload-preview {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .preview-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .preview-item:hover .preview-remove {
+            opacity: 1;
+        }
+
+        .results-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .result-card {
+            background: rgba(10, 10, 26, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(106, 0, 255, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .undertone-result {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .undertone-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .warm {
+            background: var(--warm);
+        }
+
+        .cool {
+            background: var(--cool);
+        }
+
+        .neutral {
+            background: var(--neutral);
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch::after {
+            content: attr(data-color);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .color-swatch:hover::after {
+            opacity: 1;
+        }
+
+        .harmony-result {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .harmony-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .complementary {
+            background: rgba(106, 0, 255, 0.2);
+            color: var(--accent-light);
+        }
+
+        .analogous {
+            background: rgba(77, 171, 247, 0.2);
+            color: var(--cool);
+        }
+
+        .clashing {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--warm);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: var(--primary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(106, 0, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(106, 0, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* API Section */
+        .api-section {
+            padding: 100px 0;
+            background: var(--secondary);
+        }
+
+        .api-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .api-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .api-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .api-content p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .code-example {
+            flex: 1;
+            min-width: 300px;
+            background: #1e1e3f;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-header {
+            background: #2d2d5e;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27ca3f; }
+
+        .code-body {
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            color: #f8f8f2;
+            overflow-x: auto;
+        }
+
+        .code-keyword { color: #ff79c6; }
+        .code-function { color: #50fa7b; }
+        .code-string { color: #f1fa8c; }
+        .code-comment { color: #6272a4; }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: #0a0a14;
+            padding: 60px 0 30px;
+            border-top: 1px solid rgba(106, 0, 255, 0.2);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-column a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column a:hover {
+            color: var(--accent-light);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(106, 0, 255, 0.1);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .floating {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav ul {
+                gap: 15px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .analysis-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-palette"></i>
+                    <span>ChromaStyle</span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Analysis</a></li>
+                        <li><a href="#">API</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </nav>
+                <button class="cta-button">Get Started</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>AI-Powered Color Analysis</h1>
+            <p>Discover your personal color palette and create harmonious outfits with our advanced AI technology. Upload your selfie and outfits to get personalized recommendations.</p>
+            <div class="hero-buttons">
+                <button class="cta-button" id="analyzeBtn">Start Analysis</button>
+                <button class="secondary-button">View Demo</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Section -->
+    <section class="analysis" id="analysisSection">
+        <div class="container">
+            <div class="section-title">
+                <h2>Color Analysis</h2>
+                <p>Upload your images to receive personalized color analysis and recommendations.</p>
+            </div>
+            <div class="analysis-container">
+                <div class="upload-section">
+                    <h3><i class="fas fa-upload"></i> Upload Images</h3>
+                    <div class="upload-areas">
+                        <div class="upload-area" id="selfieUpload">
+                            <i class="fas fa-user-circle"></i>
+                            <p>Upload Selfie</p>
+                            <p class="file-name" id="selfieFileName">No file selected</p>
+                            <button class="resubmit-btn" id="resubmitSelfie">Resubmit</button>
+                            <input type="file" id="selfieInput" class="file-input" accept="image/*">
+                        </div>
+                        
+                        <div class="upload-area" id="outfit1Upload">
+                            <i class="fas fa-tshirt"></i>
+                            <p>Upload Outfit 1</p>
+                            <p class="file-name" id="outfit1FileName">No file selected</p>
+                            <button class="resubmit-btn" id="resubmitOutfit1">Resubmit</button>
+                            <input type="file" id="outfit1Input" class="file-input" accept="image/*">
+                        </div>
+                        
+                        <div class="upload-area" id="outfit2Upload">
+                            <i class="fas fa-tshirt"></i>
+                            <p>Upload Outfit 2</p>
+                            <p class="file-name" id="outfit2FileName">No file selected</p>
+                            <button class="resubmit-btn" id="resubmitOutfit2">Resubmit</button>
+                            <input type="file" id="outfit2Input" class="file-input" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div class="upload-preview">
+                        <div class="preview-item" id="selfiePreview">
+                            <span>Selfie</span>
+                            <button class="preview-remove" data-target="selfie">×</button>
+                        </div>
+                        <div class="preview-item" id="outfit1Preview">
+                            <span>Outfit 1</span>
+                            <button class="preview-remove" data-target="outfit1">×</button>
+                        </div>
+                        <div class="preview-item" id="outfit2Preview">
+                            <span>Outfit 2</span>
+                            <button class="preview-remove" data-target="outfit2">×</button>
+                        </div>
+                    
+                    <button class="cta-button cta-button-full" id="analyzeImagesBtn">
+                        Analyze Colors
+                    </button>
+                </div>
+                
+                <div class="results-section">
+                    <div class="result-card">
+                        <h3><i class="fas fa-user"></i> Skin Analysis</h3>
+                        <p>Your skin undertone will be analyzed to determine the most flattering colors for you.</p>
+                        <div class="undertone-result" id="undertoneResult">
+                            <div class="undertone-dot"></div>
+                            <span>Upload a selfie to see results</span>
+                        </div>
+                        <div class="color-palette" id="skinPalette">
+                            <!-- Color swatches will be added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3><i class="fas fa-tshirt"></i> Outfit Harmony</h3>
+                        <p>Analysis of how well your outfit colors work together.</p>
+                        <div class="harmony-result" id="harmonyResult">
+                            <div class="harmony-badge">-</div>
+                            <span>Upload outfits to see harmony analysis</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3><i class="fas fa-palette"></i> Recommended Colors</h3>
+                        <p>Based on your skin tone, these colors will complement you best:</p>
+                        <div class="color-palette" id="recommendedPalette">
+                            <!-- Color swatches will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>How It Works</h2>
+                <p>Our AI-powered system analyzes colors using advanced algorithms to provide personalized recommendations.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI-Powered Analysis</h3>
+                    <p>Our system uses ColorThief and advanced color theory to analyze skin tones and outfit harmony.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Fast Processing</h3>
+                    <p>Get instant results with our optimized FastAPI backend that processes images in milliseconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Color Harmony</h3>
+                    <p>We analyze complementary, analogous, and clashing color combinations to improve your style.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Section -->
+    <section class="api-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Developer API</h2>
+                <p>Integrate our color analysis capabilities into your own applications with our RESTful API.</p>
+            </div>
+            <div class="api-container">
+                <div class="api-content">
+                    <h2>Easy Integration</h2>
+                    <p>Our FastAPI backend provides simple endpoints for skin analysis, outfit harmony, and complete analysis with just a few lines of code.</p>
+                    <button class="secondary-button">View Documentation</button>
+                </div>
+                <div class="code-example">
+                    <div class="code-header">
+                        <div class="code-dot red"></div>
+                        <div class="code-dot yellow"></div>
+                        <div class="code-dot green"></div>
+                        <span>API Example</span>
+                    </div>
+                    <div class="code-body">
+                        <pre><code><span class="code-keyword">import</span> requests
+
+<span class="code-comment"># Analyze all images</span>
+<span class="code-keyword">with</span> <span class="code-function">open</span>(<span class="code-string">'selfie.jpg'</span>, <span class="code-string">'rb'</span>) <span class="code-keyword">as</span> s, \
+     <span class="code-function">open</span>(<span class="code-string">'outfit1.jpg'</span>, <span class="code-string">'rb'</span>) <span class="code-keyword">as</span> o1, \
+     <span class="code-function">open</span>(<span class="code-string">'outfit2.jpg'</span>, <span class="code-string">'rb'</span>) <span class="code-keyword">as</span> o2:
+    
+    response = requests.post(
+        <span class="code-string">'http://api.chromastyle.com/analyze/all'</span>,
+        files={
+            <span class="code-string">'selfie'</span>: s,
+            <span class="code-string">'outfit1'</span>: o1,
+            <span class="code-string">'outfit2'</span>: o2
+        }
+    )
+    
+<span class="code-comment"># Get complete analysis</span>
+result = response.json()
+<span class="code-function">print</span>(result[<span class="code-string">'skin'</span>][<span class="code-string">'undertone'</span>])  <span class="code-comment"># Warm, Cool, or Neutral</span>
+<span class="code-function">print</span>(result[<span class="code-string">'outfits'</span>][<span class="code-string">'harmony'</span>])  <span class="code-comment"># Complementary, Analogous, or Clashing</span></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Discover Your Colors?</h2>
+            <p>Join thousands of users who have improved their style with personalized color analysis.</p>
+            <button class="cta-button">Start Your Free Trial</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>ChromaStyle</h3>
+                    <p>AI-powered color analysis for personal style and fashion.</p>
+                    <div class="social-links">
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">API</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Color Theory Guide</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 ChromaStyle by DPLOGRAM. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const analysisSection = document.getElementById('analysisSection');
+            const analyzeImagesBtn = document.getElementById('analyzeImagesBtn');
+            
+            // File inputs and upload areas
+            const selfieInput = document.getElementById('selfieInput');
+            const outfit1Input = document.getElementById('outfit1Input');
+            const outfit2Input = document.getElementById('outfit2Input');
+            
+            const selfieUpload = document.getElementById('selfieUpload');
+            const outfit1Upload = document.getElementById('outfit1Upload');
+            const outfit2Upload = document.getElementById('outfit2Upload');
+            
+            // Resubmit buttons
+            const resubmitSelfie = document.getElementById('resubmitSelfie');
+            const resubmitOutfit1 = document.getElementById('resubmitOutfit1');
+            const resubmitOutfit2 = document.getElementById('resubmitOutfit2');
+            
+            // File name displays
+            const selfieFileName = document.getElementById('selfieFileName');
+            const outfit1FileName = document.getElementById('outfit1FileName');
+            const outfit2FileName = document.getElementById('outfit2FileName');
+            
+            // Preview elements
+            const selfiePreview = document.getElementById('selfiePreview');
+            const outfit1Preview = document.getElementById('outfit1Preview');
+            const outfit2Preview = document.getElementById('outfit2Preview');
+            
+            // Store uploaded files
+            let uploadedFiles = {
+                selfie: null,
+                outfit1: null,
+                outfit2: null
+            };
+            
+            // Scroll to analysis section when button is clicked
+            analyzeBtn.addEventListener('click', function() {
+                analysisSection.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Set up upload area click handlers
+            selfieUpload.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('resubmit-btn')) {
+                    selfieInput.click();
+                }
+            });
+            
+            outfit1Upload.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('resubmit-btn')) {
+                    outfit1Input.click();
+                }
+            });
+            
+            outfit2Upload.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('resubmit-btn')) {
+                    outfit2Input.click();
+                }
+            });
+            
+            // Set up file input change handlers
+            selfieInput.addEventListener('change', function(e) {
+                handleFileUpload(e.target.files[0], 'selfie');
+            });
+            
+            outfit1Input.addEventListener('change', function(e) {
+                handleFileUpload(e.target.files[0], 'outfit1');
+            });
+            
+            outfit2Input.addEventListener('change', function(e) {
+                handleFileUpload(e.target.files[0], 'outfit2');
+            });
+            
+            // Set up resubmit button handlers
+            resubmitSelfie.addEventListener('click', function(e) {
+                e.stopPropagation();
+                resetFile('selfie');
+            });
+            
+            resubmitOutfit1.addEventListener('click', function(e) {
+                e.stopPropagation();
+                resetFile('outfit1');
+            });
+            
+            resubmitOutfit2.addEventListener('click', function(e) {
+                e.stopPropagation();
+                resetFile('outfit2');
+            });
+            
+            // Set up preview remove button handlers
+            document.querySelectorAll('.preview-remove').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const target = this.getAttribute('data-target');
+                    resetFile(target);
+                });
+            });
+            
+            // Handle drag and drop for each upload area
+            setupDragAndDrop(selfieUpload, 'selfie');
+            setupDragAndDrop(outfit1Upload, 'outfit1');
+            setupDragAndDrop(outfit2Upload, 'outfit2');
+            
+            // Handle analyze button click
+            analyzeImagesBtn.addEventListener('click', function() {
+                // Check if all files are uploaded
+                if (!uploadedFiles.selfie || !uploadedFiles.outfit1 || !uploadedFiles.outfit2) {
+                    alert('Please upload all three images: selfie, outfit 1, and outfit 2.');
+                    return;
+                }
+                
+                // In a real implementation, this would send the images to your backend
+                // For this demo, we'll simulate the response
+                simulateAnalysis();
+            });
+            
+            function handleFileUpload(file, type) {
+                if (!file) return;
+                
+                uploadedFiles[type] = file;
+                
+                // Update file name display
+                document.getElementById(`${type}FileName`).textContent = file.name;
+                
+                // Show resubmit button
+                document.getElementById(`resubmit${type.charAt(0).toUpperCase() + type.slice(1)}`).style.display = 'block';
+                
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewElement = document.getElementById(`${type}Preview`);
+                    previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'preview-remove';
+                    removeBtn.setAttribute('data-target', type);
+                    removeBtn.innerHTML = '×';
+                    removeBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        resetFile(type);
+                    });
+                    previewElement.appendChild(removeBtn);
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function resetFile(type) {
+                uploadedFiles[type] = null;
+                document.getElementById(`${type}FileName`).textContent = 'No file selected';
+                document.getElementById(`resubmit${type.charAt(0).toUpperCase() + type.slice(1)}`).style.display = 'none';
+                document.getElementById(`${type}Preview`).innerHTML = `<span>${type.charAt(0).toUpperCase() + type.slice(1)}</span><button class="preview-remove" data-target="${type}">×</button>`;
+                
+                // Reattach event listener to the new remove button
+                const newButton = document.querySelector(`.preview-remove[data-target="${type}"]`);
+                newButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    resetFile(type);
+                });
+            }
+            
+            function setupDragAndDrop(uploadArea, type) {
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = 'rgba(106, 0, 255, 0.1)';
+                });
+                
+                uploadArea.addEventListener('dragleave', function() {
+                    uploadArea.style.background = '';
+                });
+                
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '';
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFileUpload(files[0], type);
+                    }
+                });
+            }
+            
+            function simulateAnalysis() {
+                // Simulate API call delay
+                analyzeImagesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                analyzeImagesBtn.disabled = true;
+                
+                setTimeout(() => {
+                    // Simulated results based on your backend logic
+                    const undertone = Math.random() > 0.5 ? 
+                        (Math.random() > 0.5 ? 'Warm' : 'Cool') : 'Neutral';
+                    
+                    const harmonyTypes = ['Complementary', 'Analogous', 'Clashing'];
+                    const harmony = harmonyTypes[Math.floor(Math.random() * harmonyTypes.length)];
+                    
+                    // Update UI with results
+                    updateResults(undertone, harmony);
+                    
+                    analyzeImagesBtn.innerHTML = 'Analyze Colors';
+                    analyzeImagesBtn.disabled = false;
+                }, 2000);
+            }
+            
+            function updateResults(undertone, harmony) {
+                // Update undertone result
+                const undertoneResult = document.getElementById('undertoneResult');
+                const undertoneDot = undertoneResult.querySelector('.undertone-dot');
+                
+                undertoneDot.className = 'undertone-dot';
+                undertoneDot.classList.add(undertone.toLowerCase());
+                
+                undertoneResult.querySelector('span').textContent = `${undertone} Undertone`;
+                
+                // Update harmony result
+                const harmonyResult = document.getElementById('harmonyResult');
+                const harmonyBadge = harmonyResult.querySelector('.harmony-badge');
+                
+                harmonyBadge.className = 'harmony-badge';
+                harmonyBadge.classList.add(harmony.toLowerCase());
+                harmonyBadge.textContent = harmony;
+                
+                harmonyResult.querySelector('span').textContent = `${harmony} Color Harmony`;
+                
+                // Update palettes based on undertone
+                updatePalettes(undertone);
+            }
+            
+            function updatePalettes(undertone) {
+                // Define color palettes based on undertone (from your logic.py)
+                const palettes = {
+                    'Warm': ['#C8A951', '#E97451', '#E1AD01', '#F3E5AB', '#CC5500'],
+                    'Cool': ['#1F305E', '#FF66CC', '#50C878', '#808080', '#E6E6FA'],
+                    'Neutral': ['#F5F5DC', '#FFFFFF', '#008080', '#36454F', '#FADADD']
+                };
+                
+                const colorNames = {
+                    'Warm': ['Olive', 'Coral', 'Mustard', 'Cream', 'Red-Orange'],
+                    'Cool': ['Navy', 'Rose', 'Emerald', 'Gray', 'Lavender'],
+                    'Neutral': ['Beige', 'White', 'Teal', 'Charcoal', 'Soft Pink']
+                };
+                
+                const skinPalette = document.getElementById('skinPalette');
+                const recommendedPalette = document.getElementById('recommendedPalette');
+                
+                // Clear existing palettes
+                skinPalette.innerHTML = '';
+                recommendedPalette.innerHTML = '';
+                
+                // Add color swatches
+                palettes[undertone].forEach((color, index) => {
+                    const skinSwatch = document.createElement('div');
+                    skinSwatch.className = 'color-swatch';
+                    skinSwatch.style.background = color;
+                    skinSwatch.setAttribute('data-color', colorNames[undertone][index]);
+                    skinPalette.appendChild(skinSwatch);
+                    
+                    const recSwatch = document.createElement('div');
+                    recSwatch.className = 'color-swatch';
+                    recSwatch.style.background = color;
+                    recSwatch.setAttribute('data-color', colorNames[undertone][index]);
+                    recommendedPalette.appendChild(recSwatch);
+                });
+            }
+        });
+    </script>
+    <script>
+document.getElementById('analyzeImagesBtn').addEventListener('click', async () => {
+    const formData = new FormData();
+    formData.append('selfie', document.getElementById('selfieInput').files[0]);
+    formData.append('outfit1', document.getElementById('outfit1Input').files[0]);
+    formData.append('outfit2', document.getElementById('outfit2Input').files[0]);
+
+    const response = await fetch('/analyze', {
+        method: 'POST',
+        body: formData
+    });
+
+    const data = await response.json();
+    console.log(data);
+    alert(data.summary);
+});
+</script>
+
+</body>
+</html>
